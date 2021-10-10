@@ -1,7 +1,7 @@
-// ignore_for_file: unused_element, sized_box_for_whitespace, avoid_unnecessary_containers
+// ignore_for_file: unused_element, sized_box_for_whitespace, avoid_unnecessary_containers, dead_code
 
 import 'package:flutter/material.dart';
-import 'package:sizer/sizer.dart';
+import 'package:moviexplicta/widget/description.dart';
 import 'package:moviexplicta/utils/text.dart';
 
 class TrendingMovies extends StatelessWidget {
@@ -16,7 +16,7 @@ class TrendingMovies extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const modified_Text(
-              color: Colors.white, size: 26, text: 'TrendingMovies'),
+              color: Colors.white, size: 26, text: 'Trending Movies'),
           const SizedBox(
             height: 10,
           ),
@@ -27,29 +27,49 @@ class TrendingMovies extends StatelessWidget {
                 itemCount: trending.length,
                 itemBuilder: (context, index) {
                   return InkWell(
-                    onTap: () {},
-                    child: Container(
-                      width: 140,
-                      child: Column(
-                        children: [
-                          Container(
-                            height: 200,
-                            decoration: BoxDecoration(
-                                image: DecorationImage(
-                                    image: NetworkImage(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => Description(
+                                    name: trending[index]['title'],
+                                    bannerurl:
                                         'https://image.tmdb.org/t/p/w500' +
-                                            trending[index]['poster_path']))),
-                          ),
-                          Container(
-                            child: modified_Text(
-                                color: Colors.white,
-                                size: 10,
-                                text: trending[index]['original_title'] ??
-                                    'loading'),
+                                            trending[index]['backdrop_path'],
+                                    posterurl:
+                                        'https://image.tmdb.org/t/p/w500' +
+                                            trending[index]['poster_path'],
+                                    description: trending[index]['overview'],
+                                    vote: trending[index]['vote_average']
+                                        .toString(),
+                                    launch_on: trending[index]['release_date'],
+                                  )));
+                    },
+                    child: trending[index]['original_title'] != null
+                        ? Container(
+                            width: 140,
+                            child: Column(
+                              children: [
+                                Container(
+                                  height: 200,
+                                  decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                          image: NetworkImage(
+                                              'https://image.tmdb.org/t/p/w500' +
+                                                  trending[index]
+                                                      ['poster_path']))),
+                                ),
+                                Container(
+                                  child: modified_Text(
+                                      color: Colors.white,
+                                      size: 10,
+                                      text: trending[index]['original_title'] ??
+                                          'loading'),
+                                )
+                              ],
+                            ),
                           )
-                        ],
-                      ),
-                    ),
+                        : Container(),
                   );
                 }),
           )

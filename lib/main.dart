@@ -81,7 +81,7 @@ class __HomeScreenState extends State<_HomeScreen> {
       appBar: AppBar(
           backgroundColor: Colors.transparent,
           title: modified_Text(
-            text: ('Moviexplicta'),
+            text: ('Moviexplicta ❤️️'),
             color: Colors.white,
             size: 25.0,
           )),

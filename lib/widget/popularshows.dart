@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:moviexplicta/utils/text.dart';
+import 'package:moviexplicta/widget/description.dart';
 
 class PopularTvShows extends StatelessWidget {
   final List Tv;
@@ -26,7 +27,21 @@ class PopularTvShows extends StatelessWidget {
                 itemCount: Tv.length,
                 itemBuilder: (context, index) {
                   return InkWell(
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => Description(
+                                  name: Tv[index]['original_name'],
+                                  bannerurl: 'https://image.tmdb.org/t/p/w500' +
+                                      Tv[index]['backdrop_path'],
+                                  posterurl: 'https://image.tmdb.org/t/p/w500' +
+                                      Tv[index]['poster_path'],
+                                  description: Tv[index]['overview'],
+                                  vote: Tv[index]['vote_average'].toString(),
+                                  launch_on:
+                                      Tv[index]['release_date'].toString())));
+                    },
                     child: Container(
                       padding: const EdgeInsets.all(5),
                       width: 250,
