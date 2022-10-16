@@ -1,0 +1,9 @@
+export 'home.dart';
+export '../model/trendingmodel/modeltrending.dart';
+export 'trendingmovies/trending.dart';
+export 'tvshows/tvshow.dart';
+export 'widget/description.dart';
+export '../model/tvshowmodel/modeltvshows.dart';
+export '../data/data.dart';
+export '../model/topratedmodel/topratedmodel.dart';
+export '../view/toprate/toprated.dart';
