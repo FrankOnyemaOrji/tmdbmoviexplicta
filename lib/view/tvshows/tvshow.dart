@@ -1,8 +1,10 @@
-// ignore_for_file: sized_box_for_whitespace
+// ignore_for_file: sized_box_for_whitespace, non_constant_identifier_names
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sizer/sizer.dart';
 
+import '../../cubit/tvshows/tvshows_cubit.dart';
 import '../exports.dart';
 
 class PopularTvShows extends StatefulWidget {
@@ -15,8 +17,9 @@ class PopularTvShows extends StatefulWidget {
 class _PopularTvShowsState extends State<PopularTvShows> {
   List<PopularTvShow> popularTvShows = [];
   void loadPopularTvShows() async {
-    popularTvShows = await TvShowData().geTvShowData();
-    setState(() {});
+    final LoadingTvShows = BlocProvider.of<TvshowsCubit>(context);
+    final tvShows = await TvShowData().geTvShowData();
+    LoadingTvShows.tvShows(tvShows);
   }
 
   @override
@@ -44,61 +47,73 @@ class _PopularTvShowsState extends State<PopularTvShows> {
           ),
           Container(
             height: 50.w,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: popularTvShows.length,
-              itemBuilder: ((context, index) {
-                return InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => Descrisption(
-                            name: popularTvShows[index].name!,
-                            description: popularTvShows[index].description!,
-                            bannerurl:'https://image.tmdb.org/t/p/w500${popularTvShows[index].bannerurl}',
-                            posterurl: 'https://image.tmdb.org/t/p/w500${popularTvShows[index].posterurl}',
-                            vote: popularTvShows[index].vote!,
-                            lunchdate: popularTvShows[index].lunchdate != null
-                                ? popularTvShows[index].lunchdate!
-                                : 'Not Avialiable',
-                          ),
-                        ),
-                      );
-                    },
-                    child: Container(
-                      margin: const EdgeInsets.all(10),
-                      child: Column(
-                        children: [
-                          Container(
-                            width: 30.w,
-                            height: 30.w,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              image: DecorationImage(
-                                image: NetworkImage(popularTvShows[index]
-                                            .posterurl !=
-                                        null
-                                    ? 'https://image.tmdb.org/t/p/w500${popularTvShows[index].posterurl}'
-                                    : 'Image Not Avialiable'),
-                                fit: BoxFit.cover,
+            child: BlocBuilder<TvshowsCubit, TvshowsState>(
+              builder: (context, state) {
+                final List<PopularTvShow> popularTvShows = state.tvShows;
+                if (state is GetTvShows){
+                  return ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: popularTvShows.length,
+                  itemBuilder: ((context, index) {
+                    return InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Descrisption(
+                                name: popularTvShows[index].name!,
+                                description: popularTvShows[index].description!,
+                                bannerurl:
+                                    'https://image.tmdb.org/t/p/w500${popularTvShows[index].bannerurl}',
+                                posterurl:
+                                    'https://image.tmdb.org/t/p/w500${popularTvShows[index].posterurl}',
+                                vote: popularTvShows[index].vote!,
+                                lunchdate:
+                                    popularTvShows[index].lunchdate != null
+                                        ? popularTvShows[index].lunchdate!
+                                        : 'Not Avialiable',
                               ),
                             ),
+                          );
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.all(10),
+                          child: Column(
+                            children: [
+                              Container(
+                                width: 30.w,
+                                height: 30.w,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                  image: DecorationImage(
+                                    image: NetworkImage(popularTvShows[index]
+                                                .posterurl !=
+                                            null
+                                        ? 'https://image.tmdb.org/t/p/w500${popularTvShows[index].posterurl}'
+                                        : 'Image Not Avialiable'),
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                height: 2.w,
+                              ),
+                              Text(
+                                popularTvShows[index].name!,
+                                style: TextStyle(
+                                    fontSize: 12.sp,
+                                    fontWeight: FontWeight.w400,
+                                    color: Colors.white),
+                              ),
+                            ],
                           ),
-                          SizedBox(
-                            height: 2.w,
-                          ),
-                          Text(
-                            popularTvShows[index].name!,
-                            style: TextStyle(
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.w400,
-                                color: Colors.white),
-                          ),
-                        ],
-                      ),
-                    ));
-              }),
+                        ));
+                  }),
+                );
+                }else{
+                  return const Center(child: CircularProgressIndicator());
+                }
+              },
             ),
           )
         ],

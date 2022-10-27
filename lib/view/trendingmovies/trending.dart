@@ -1,8 +1,10 @@
 // ignore_for_file: must_be_immutable, sized_box_for_whitespace
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sizer/sizer.dart';
 
+import '../../cubit/trendingmovies/trendingmovies_cubit.dart';
 import '../exports.dart';
 
 class Trending extends StatefulWidget {
@@ -15,15 +17,15 @@ class Trending extends StatefulWidget {
 }
 
 class _TrendingState extends State<Trending> {
-  List<TrendingMovies> trendingData = [];
-  void loadtrendingData() async {
-    trendingData = await TrendingData().getTrendingData();
-    setState(() {});
+  void loadTrendingMovies() async {
+    final LoadingMovies = BlocProvider.of<TrendingmoviesCubit>(context);
+    final movieList = await TrendingData().getTrendingData();
+    LoadingMovies.trendingMovies(movieList);
   }
 
   @override
   void initState() {
-    loadtrendingData();
+    loadTrendingMovies();
     super.initState();
   }
 
@@ -46,53 +48,66 @@ class _TrendingState extends State<Trending> {
           ),
           Container(
             height: 50.w,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: trendingData.length,
-              itemBuilder: (context, index) {
-                return InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => Descrisption(
-                              name: trendingData[index].name!,
-                              description: trendingData[index].description!,
-                              bannerurl:
-                                  'https://image.tmdb.org/t/p/w500${trendingData[index].bannerurl}',
-                              posterurl:
-                                  'https://image.tmdb.org/t/p/w500${trendingData[index].posterurl}',
-                              vote: trendingData[index].vote!,
-                              lunchdate: trendingData[index].lunchdate != null
-                                  ? trendingData[index].lunchdate!
-                                  : 'Not Avialiable'),
+            child: BlocBuilder<TrendingmoviesCubit, TrendingmoviesState>(
+              builder: (context, state) {
+                final List<TrendingMovies> trendingMovies =
+                    state.trendingMovies;
+                if (state is GetTrendingMovies){
+                  return ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: trendingMovies.length,
+                  itemBuilder: (context, index) {
+                    return InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Descrisption(
+                                name: trendingMovies[index].name!,
+                                description: trendingMovies[index].description!,
+                                bannerurl:
+                                    'https://image.tmdb.org/t/p/w500${trendingMovies[index].bannerurl}',
+                                posterurl:
+                                    'https://image.tmdb.org/t/p/w500${trendingMovies[index].posterurl}',
+                                vote: trendingMovies[index].vote!,
+                                lunchdate: trendingMovies[index].lunchdate != null
+                                    ? trendingMovies[index].lunchdate!
+                                    : 'Not Avialiable'),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        width: 35.w,
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: NetworkImage(trendingMovies[index].posterurl !=
+                                    null
+                                ? 'https://image.tmdb.org/t/p/w500${trendingMovies[index].posterurl}'
+                                : 'Image Not Avialiable'),
+                            fit: BoxFit.cover,
+                          ),
                         ),
-                      );
-                    },
-                    child: Container(
-                      width: 35.w,
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image: NetworkImage(trendingData[index].posterurl != null ?
-                              'https://image.tmdb.org/t/p/w500${trendingData[index].posterurl}' : 'Image Not Avialiable'),
-                          fit: BoxFit.cover,
+                        child: Column(
+                          children: [
+                            Text(
+                              trendingMovies[index].name != null
+                                  ? trendingMovies[index].name!
+                                  : "Not loding name",
+                              style: TextStyle(
+                                  fontSize: 15.sp,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.white),
+                            ),
+                          ],
                         ),
                       ),
-                      // child: Column(
-                      //   children: [
-                      //     Text(
-                      //       trendingData[index].name != null
-                      //           ? trendingData[index].name!
-                      //           : "Not loding name",
-                      //       style: TextStyle(
-                      //           fontSize: 15.sp,
-                      //           fontWeight: FontWeight.w400,
-                      //           color: Colors.white),
-                      //     ),
-                      //   ],
-                      // ),
-                    ),
                     );
+                  },
+                );
+                }
+                else{
+                  return const Center(child: CircularProgressIndicator());
+                }
               },
             ),
           ),

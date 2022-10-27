@@ -2,7 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
-
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../cubit/toprated/toprated_cubit.dart';
 import '../exports.dart';
 
 class TopRatedMovies extends StatefulWidget {
@@ -13,15 +14,14 @@ class TopRatedMovies extends StatefulWidget {
 }
 
 class _TopRatedMoviesState extends State<TopRatedMovies> {
-  List<TopRatedMovie> topRatedData = [];
-  void loadTopRatedMovies() async {
-    topRatedData = await TopratedData().getTopRatedData();
-    setState(() {});
-  }
-
+void loadMovies() async{
+  final LoadingMovies = BlocProvider.of<TopratedCubit>(context);
+  final movieList = await TopratedData().getTopRatedData();
+  LoadingMovies.topRate(movieList);
+}
   @override
   void initState() {
-    loadTopRatedMovies();
+    loadMovies();
     super.initState();
   }
 
@@ -44,58 +44,72 @@ class _TopRatedMoviesState extends State<TopRatedMovies> {
           ),
           Container(
             height: 50.w,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: topRatedData.length,
-              itemBuilder: ((context, index) {
-                return InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => Descrisption(
-                            name: topRatedData[index].name!,
-                            description: topRatedData[index].description!,
-                            bannerurl:
-                                'https://image.tmdb.org/t/p/w500${topRatedData[index].bannerurl}',
-                            posterurl:
-                                'https://image.tmdb.org/t/p/w500${topRatedData[index].posterurl}',
-                            lunchdate: topRatedData[index].lunchdate != null
-                                ? topRatedData[index].lunchdate!
-                                : 'Not Avialiable',
-                            vote: topRatedData[index].vote!,
-                          ),
-                        ),
-                      );
-                    },
-                    child: Container(
-                      margin: const EdgeInsets.only(right: 10),
-                      child: Column(
-                        children: [
-                          Container(
-                            height: 30.w,
-                            width: 30.w,
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                image: DecorationImage(
-                                    image: NetworkImage(
-                                        'https://image.tmdb.org/t/p/w500${topRatedData[index].posterurl}'),
-                                    fit: BoxFit.cover)),
-                          ),
-                          SizedBox(
-                            height: 2.w,
-                          ),
-                          Text(
-                            topRatedData[index].name!,
-                            style: TextStyle(
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.w400,
-                                color: Colors.white),
-                          ),
-                        ],
-                      ),
-                    ));
-              }),
+            child: BlocBuilder<TopratedCubit, TopratedState>(
+              builder: (context, state) {
+                final List<TopRatedMovie> topRatedMovies = state.topRatedMovies;
+                if (state is GetTopRatedMovies) {
+                  return ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: topRatedMovies.length,
+                    itemBuilder: ((context, index) {
+                      return InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => BlocProvider.value(
+                                  value:
+                                      BlocProvider.of<TopratedCubit>(context),
+                                  child: Descrisption(
+                                    name: topRatedMovies[index].name!,
+                                    description:
+                                        topRatedMovies[index].description!,
+                                    bannerurl:
+                                        'https://image.tmdb.org/t/p/w500${topRatedMovies[index].bannerurl}',
+                                    posterurl:
+                                        'https://image.tmdb.org/t/p/w500${topRatedMovies[index].posterurl}',
+                                    lunchdate: topRatedMovies[index].lunchdate!,
+                                    vote: topRatedMovies[index].vote!,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.only(right: 10),
+                            child: Column(
+                              children: [
+                                Container(
+                                  height: 30.w,
+                                  width: 30.w,
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10),
+                                      image: DecorationImage(
+                                          image: NetworkImage(
+                                              'https://image.tmdb.org/t/p/w500${topRatedMovies[index].posterurl}'),
+                                          fit: BoxFit.cover)),
+                                ),
+                                SizedBox(
+                                  height: 2.w,
+                                ),
+                                Text(
+                                  topRatedMovies[index].name!,
+                                  style: TextStyle(
+                                      fontSize: 12.sp,
+                                      fontWeight: FontWeight.w400,
+                                      color: Colors.white),
+                                ),
+                              ],
+                            ),
+                          ));
+                    }),
+                  );
+                } else {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+              },
             ),
           ),
         ],
